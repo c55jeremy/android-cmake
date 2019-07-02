@@ -35,10 +35,20 @@ include_directories(
 
 #設定連結Flags及函式庫變數
 set(ANDROID_LINK_FLAGS64 "-pie -nostdlib -Bdynamic -Wl,--gc-sections -Wl,-z,nocopyreloc -Wl,-dynamic-linker,/system/bin/linker64 -Wl,-rpath-link=$ENV{ANDROID_PRODUCT_OUT}/obj/lib")
+set(ANDROID_RPATH "-Wl,--rpath=/system/lib64") #目前用不上
+set(ANDROID_SHAREDLIB_LINK_FLAGS "-nostdlib -shared  -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -Wl,--build-id=md5 -Wl,--warn-shared-textrel -Wl,--fatal-warnings -Wl,-maarch64linux -Wl,--hash-style=gnu -Wl,--fix-cortex-a53-843419 -fuse-ld=gold -Wl,--icf=safe -Wl,--no-undefined-version")
+set(ANDROID_CLANG_LINK_FLAGS "-target aarch64-linux-android -B$ENV{ANDROID_TOOLCHAIN}")
 set(ANDROID_COMMON_STATIC_LIBS64 "-Wl,--whole-archive -Wl,--no-whole-archive $ENV{ANDROID_PRODUCT_OUT}/obj/STATIC_LIBRARIES/libcompiler_rt-extras_intermediates/libcompiler_rt-extras.a $ENV{ANDROID_PRODUCT_OUT}/obj/STATIC_LIBRARIES//libatomic_intermediates/libatomic.a $ENV{ANDROID_PRODUCT_OUT}/obj/STATIC_LIBRARIES/libgcc_intermediates/libgcc.a")
+#執行檔CRT
 set(ANDROID_CRTBEDING_DYNAMIC64 "$ENV{ANDROID_PRODUCT_OUT}/obj/lib/crtbegin_dynamic.o")
 set(ANDROID_CRTEND_ANDROID64 "$ENV{ANDROID_PRODUCT_OUT}/obj/lib/crtend_android.o")
-set(ANDROID_COMMON_SHARED_LIBS64 "-L$ENV{ANDROID_PRODUCT_OUT}/system/lib64 -lc++ -lc -lm -ldl $ENV{ANDROID_PRODUCT_OUT}/system/lib64/ld-android.so")
+#動態連結檔CRT
+set(ANDROID_CRTBEDING_SO64 "$ENV{ANDROID_PRODUCT_OUT}/obj/lib/crtbegin_so.o")
+set(ANDROID_CRTEND64 "$ENV{ANDROID_PRODUCT_OUT}/obj/lib/crtend_so.o")
+#系統函式庫
+link_directories($ENV{ANDROID_PRODUCT_OUT}/system/lib64)
+set(ANDROID_COMMON_SHARED_LIBS64 "$ENV{ANDROID_PRODUCT_OUT}/system/lib64/ld-android.so")
 set(ANDROID_SYSTEM_SHARED_LIBS64 "-Wl,--no-undefined $ENV{ANDROID_PRODUCT_OUT}/obj/lib/libc++.so $ENV{ANDROID_PRODUCT_OUT}/obj/lib/libc.so $ENV{ANDROID_PRODUCT_OUT}/obj/lib/libm.so $ENV{ANDROID_PRODUCT_OUT}/obj/lib/libdl.so $ENV{ANDROID_PRODUCT_OUT}/system/lib64/ld-android.so")
 #整合以上變數，產生Linker Flags
-set(CMAKE_EXE_LINKER_FLAGS "${ANDROID_LINK_FLAGS64} ${ANDROID_COMMON_STATIC_LIBS64} ${ANDROID_COMMON_SHARED_LIBS64} ${ANDROID_CRTBEDING_DYNAMIC64}")
+set(CMAKE_EXE_LINKER_FLAGS "${ANDROID_LINK_FLAGS64} ${ANDROID_COMMON_STATIC_LIBS64} ${ANDROID_COMMON_SHARED_LIBS64} ${ANDROID_CRTBEDING_DYNAMIC64} ${ANDROID_CRTEND_ANDROID64}")
+set(CMAKE_SHARED_LINKER_FLAGS "${ANDROID_SHAREDLIB_LINK_FLAGS} ${ANDROID_COMMON_STATIC_LIBS64} ${ANDROID_COMMON_SHARED_LIBS64} ${ANDROID_CRTBEDING_SO64} ${ANDROID_CRTEND64}")
