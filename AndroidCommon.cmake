@@ -6,13 +6,17 @@ else()
   message(STATUS "Android codebase in " $ENV{ANDROID_BUILD_TOP})
 endif()
 
-#設定C/C++ Compiler
+#設定CROSS Compile
+set(CMAKE_CROSSCOMPILING TRUE)
+set(CMAKE_SKIP_BUILD_RPATH TRUE) #解決DT_RPATH unused的警告，這是由linker發出
+
+#設定C/C++ Compiler: GCC
 set(CMAKE_CXX_COMPILER $ENV{ANDROID_TOOLCHAIN}/aarch64-linux-android-g++)
 set(CMAKE_C_COMPILER $ENV{ANDROID_TOOLCHAIN}/aarch64-linux-android-gcc)
 
 #設定通用Definitions
 add_definitions(
-  -DANDROID 
+  -DANDROID
   -D_FORTIFY_SOURCE=2 
   -D__compiler_offsetof=__builtin_offsetof 
   -D_USING_LIBCXX 
@@ -37,7 +41,7 @@ include_directories(
 set(ANDROID_LINK_FLAGS64 "-pie -nostdlib -Bdynamic -Wl,--gc-sections -Wl,-z,nocopyreloc -Wl,-dynamic-linker,/system/bin/linker64 -Wl,-rpath-link=$ENV{ANDROID_PRODUCT_OUT}/obj/lib")
 set(ANDROID_RPATH "-Wl,--rpath=/system/lib64") #目前用不上
 set(ANDROID_SHAREDLIB_LINK_FLAGS "-nostdlib -shared  -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -Wl,--build-id=md5 -Wl,--warn-shared-textrel -Wl,--fatal-warnings -Wl,-maarch64linux -Wl,--hash-style=gnu -Wl,--fix-cortex-a53-843419 -fuse-ld=gold -Wl,--icf=safe -Wl,--no-undefined-version")
-set(ANDROID_CLANG_LINK_FLAGS "-target aarch64-linux-android -B$ENV{ANDROID_TOOLCHAIN}")
+set(ANDROID_CLANG_LINK_FLAGS "-target aarch64-linux-android -B$ENV{ANDROID_TOOLCHAIN}") #Clang需要
 set(ANDROID_COMMON_STATIC_LIBS64 "-Wl,--whole-archive -Wl,--no-whole-archive $ENV{ANDROID_PRODUCT_OUT}/obj/STATIC_LIBRARIES/libcompiler_rt-extras_intermediates/libcompiler_rt-extras.a $ENV{ANDROID_PRODUCT_OUT}/obj/STATIC_LIBRARIES//libatomic_intermediates/libatomic.a $ENV{ANDROID_PRODUCT_OUT}/obj/STATIC_LIBRARIES/libgcc_intermediates/libgcc.a")
 #執行檔CRT
 set(ANDROID_CRTBEDING_DYNAMIC64 "$ENV{ANDROID_PRODUCT_OUT}/obj/lib/crtbegin_dynamic.o")

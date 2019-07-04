@@ -21,7 +21,6 @@ void printVector(vector<int> v)
     cout << endl;
 }
 
-
 int main() {
 	// the iterator constructor can also be used to construct from arrays:
 	  int myints[] = {16,2,77,29};
