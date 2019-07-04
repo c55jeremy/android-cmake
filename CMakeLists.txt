@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 3.5)
 #第一個Project: helloworld
 project (cmake_test)
 
+#使用CLANG
+set(USE_CLANG TRUE)
 #Android編譯通用設定
 include(${CMAKE_CURRENT_SOURCE_DIR}/AndroidCommon.cmake)
 
@@ -11,7 +13,7 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+ 
 #Project Build Targets
 set(ANDROID_TARGET helloworld)
 set(ANDROID_LIB_MYFUNC myfunc)
@@ -28,6 +30,14 @@ target_link_libraries(${ANDROID_TARGET} PRIVATE c++ c m dl)
 add_dependencies(${ANDROID_TARGET} ${ANDROID_LIB_MYFUNC})
 #加入Target專有的Link option
 set_target_properties(${ANDROID_TARGET} PROPERTIES LINK_FLAGS "-fPIC -DPIC") 
+
+#[[ Strip Commands
+add_custom_command(TARGET ${ANDROID_TARGET}
+    POST_BUILD
+    COMMAND $ENV{ANDROID_TOOLCHAIN}/aarch64-linux-android-strip --remove-section=.comment --strip-debug --strip-unneeded ${ANDROID_TARGET}
+    COMMAND $ENV{ANDROID_TOOLCHAIN}/aarch64-linux-android-strip --remove-section=.comment --strip-debug --strip-unneeded lib${ANDROID_LIB_MYFUNC}.so
+)
+#]]
 
 #[[
 add_custom_command(OUTPUT dummy.cpp
